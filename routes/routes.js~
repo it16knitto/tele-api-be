@@ -1,0 +1,110 @@
+'use strict';
+
+module.exports = function(app) {
+
+    // var todoupload = require('../knitto_rest/upload');
+    var todotesting = require('../mobileapp/tes')
+    var todologin = require('../user_login/login')
+    var todomobileapp = require('../mobileapp/operatormenu')
+    var todomobileappscanrollan = require('../mobileapp/scanrollan')
+    var todomobileappstokopname = require('../mobileapp/stokopname')
+    var todotaskutility = require('../task/utility')
+    var todotaskupload = require('../task/upload')
+    /// untuk menghitung data lab dari pabrik
+    var todolabpabrik = require('../get_lab/hitunglab')
+   // variabel jason web token
+   const authJwt = require('./verifyJwtToken')
+   const todoknittoreport = require('../knittoreport/pengambilan')
+
+   const todoapibank = require('../kas_bank/apibank')
+      const todocsvbank = require('../kas_bank/csvbank')
+
+  //fpemindahanpo_sebagian di program reordering
+  var todoposebagian= require('../po_kain/fpemindahanpo_sebagian.js');
+
+
+   /////knitto report
+   app.get('/knittoreport/pengambilan/getantrianorder',[authJwt.verifyToken],todoknittoreport.getantrianorder);
+
+
+ // testing javascript
+app.post('/testing',todotesting.testing)
+/// user login
+app.post('/user_login/login',todologin.login)
+/// user task
+app.post('/addPicture',todotaskupload.addPicture)
+// untuk menampilkan kode awal roll percabang
+app.post('/task/awalnoroll',[authJwt.verifyToken],todotaskutility.awalnoroll)
+// untuk pengecekan noroll menggunakan kode verifikasi
+app.post('/task/cekkodeverifikasi',[authJwt.verifyToken],todotaskutility.cekkodeverifikasi)
+// untuk pengecekan stok per lokasi
+app.post('/task/cekstoklokasi',[authJwt.verifyToken],todotaskutility.cekstoklokasi)
+
+
+//---------- mobile app --------->>>>>>
+app.route('/user_login/login').post(todologin.login)
+// untuk mengambil jml order rollan yang harus di scan result jml = ?
+app.post('/mobileapp/jmlscanrollan',[authJwt.verifyToken],todomobileapp.scanrollan)
+// untuk mengambil jml order kgan yang harus di scan result jml = ?
+app.post('/mobileapp/jmlscankgan',[authJwt.verifyToken],todomobileapp.scankgan)
+// untuk mengambil jml order yang harus di packing result jml = ?
+app.post('/mobileapp/jmlpacking',[authJwt.verifyToken],todomobileapp.packingkain)
+// untuk mengambil jml order kain yang harus di bal result jml = ?
+app.post('/mobileapp/jmlngebalkain',[authJwt.verifyToken],todomobileapp.pengebalankain)
+// untuk mengambil jml order katalog yang harus di bal result jml = ?
+app.post('/mobileapp/jmlngebalkatalog',[authJwt.verifyToken],todomobileapp.pengebalankatalog)
+// untuk mengambil jml order rollan yang di batalkan result jml = ?
+app.post('/mobileapp/jmlscanrollandibatalkan',[authJwt.verifyToken],todomobileapp.pembatalanscanrollan)
+
+//// ----------- form data order yang harus di scan ---------->>>
+// menampilkan data semua order yang harus di scan
+app.post('/mobileapp/datascanrollan',[authJwt.verifyToken],todomobileappscanrollan.datascanrollan)
+// menampilkan data  order yang kainnya ada di gudang harus di scan
+app.post('/mobileapp/datascanrollangudang',[authJwt.verifyToken],todomobileappscanrollan.datascanrollangudang)
+// untuk mngecek apakah karyawan sudah mempunyai pekerjaan scan rollan
+app.post('/mobileapp/cekpekerjaan',[authJwt.verifyToken],todomobileappscanrollan.cekpekerjaan)
+// untuk mngecek apakah no order tersebut sudah di kerjakan oleh orang lain
+app.post('/mobileapp/ceksudahdikerjakan',[authJwt.verifyToken],todomobileappscanrollan.ceksudahdikerjakan)
+// untuk menampilkan data scan rollan per order
+app.post('/mobileapp/dataharusdiscan',[authJwt.verifyToken],todomobileappscanrollan.dataharusdiscan)
+// untuk menampilkan data scan rollan yang harus di scan per jenis kain
+app.post('/mobileapp/datasudahdiscan',[authJwt.verifyToken],todomobileappscanrollan.datasudahdiscan)
+// untuk menampilkan data scan rollan yang sudah di scan per detail
+app.post('/mobileapp/rollsudahdiscan',[authJwt.verifyToken],todomobileappscanrollan.rollsudahdiscan)
+// untuk scan ROLLAN
+app.post('/mobileapp/scanrollan',[authJwt.verifyToken],todomobileappscanrollan.scanrollan)
+// untuk hapus pekerjaan scan rollan
+app.post('/mobileapp/hapuspekerjaanscan',[authJwt.verifyToken],todomobileappscanrollan.hapuspekerjaanscan)
+// untuk hapus hasil scan rollan
+app.post('/mobileapp/hapushasilscan',[authJwt.verifyToken],todomobileappscanrollan.hapushasilscan)
+
+//// ----------- form Stokopname Lokasi ---------->>>
+// untuk cek lokasi
+app.post('/mobileapp/stokopname/ceklokasi',[authJwt.verifyToken],todomobileappstokopname.scanlokasi)
+// untuk scan kain
+app.post('/mobileapp/stokopname/scankain',[authJwt.verifyToken],todomobileappstokopname.scankain)
+// untuk selesai stokopname
+app.post('/mobileapp/stokopname/selesai',todomobileappstokopname.selesai)
+
+
+//////-------> reordering -----------<////////////
+
+//////////// fpindahposebagian
+app.get('/po_kain/po_sebagianmaster',[authJwt.verifyToken],todoposebagian.masterpindahpo);
+app.post('/po_kain/detailpindahpo',[authJwt.verifyToken],todoposebagian.detailpindahpo);
+app.post('/po_kain/inserta_po_pindahsebagian',[authJwt.verifyToken],todoposebagian.inserta_po_pindahsebagian);
+app.post('/po_kain/inserta_detail_popindahan',[authJwt.verifyToken],todoposebagian.inserta_detail_popindahan);
+app.post('/po_kain/inserta_jumlahpindahpo',[authJwt.verifyToken],todoposebagian.inserta_jumlahpindahpo);
+
+/////////// untuk perhitungan data lab
+app.get('/get_lab/hitunglab',todolabpabrik.hitunglab);
+
+///// import kas bank
+app.post('/bca',[authJwt.verifyToken],todoapibank.bca)
+app.post('/inputkasbank',[authJwt.verifyToken],todoapibank.inputkasbank
+
+app.post('/csvbank',[authJwt.verifyToken],todocsvbank.importkasbankbatch)
+app.post('/csvinputkasbank',[authJwt.verifyToken],todocsvbank.inputkasbank)
+
+
+};
