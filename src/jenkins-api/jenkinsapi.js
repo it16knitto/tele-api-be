@@ -6,6 +6,7 @@ var queryvalue = "";
 const { create_pipelinesinglescriptdocker } = require("../jenkins-api/create_pipelinedocker");
 const { create_pipelinescriptpm2 } = require("../jenkins-api/create_pipelinepm2");
 const { create_pipelinesinglescriptartifact } = require("../jenkins-api/create_pipelineartifac");
+const { create_pipelinesinglesDB } = require("../jenkins-api/create_pipelineDbMysql");
 
 // Instance Axios dengan dukungan cookie
 const jenkinsUrl = "http://192.168.20.12:8080"; // Ganti dengan URL Jenkins Anda
@@ -13,53 +14,54 @@ const apiToken = "1161bce0b3fda8c0c17b8808fb67b1df11"; // Ganti dengan API Token
 const username = "it-knitto"; // Username Anda
 
 exports.createPipeline = async function (req, res) {
-  //try {
+  try {
+    const tipe_deploy = req.body.tipe_deploy;
+    const id_job = req.body.id_job;
+    let script;
+    let pipelinename = "";
 
-  const tipe_deploy = req.body.tipe_deploy;
-  const id_job = req.body.id_job;
-  let script;
-  let pipelinename = "";
+    querystr = "select * from job where id=? ";
+    queryvalue = [id_job];
+    let datajob;
+    await tabel.queryDB(querystr, queryvalue).then(async (onres) => {
+      if (onres.rows.length == 0) {
+        response.ok({ pesan: "job not found" }, 200, res);
+      } else {
+        datajob = onres.rows[0];
 
-  querystr = "select * from job where id=? ";
-  queryvalue = [id_job];
-  let datajob;
-  await tabel.queryDB(querystr, queryvalue).then(async (onres) => {
-    if (onres.rows.length == 0) {
-      response.ok({ pesan: "job not found" }, 200, res);
-    } else {
-      datajob = onres.rows[0];
-
-      if (tipe_deploy == "docker") {
-        console.log("deploy docker");
-        script = await create_pipelinesinglescriptdocker(datajob);
-        pipelinename = datajob.name;
-      } else if (tipe_deploy == "pm2") {
-        script = await create_pipelinescriptpm2(datajob);
-        pipelinename = datajob.name + "-pm2";
-      } else if (tipe_deploy == "artifact") {
-        script = await create_pipelinesinglescriptartifact(datajob);
-        pipelinename = datajob.name + "-artifact";
+        if (tipe_deploy == "docker") {
+          console.log("deploy docker");
+          script = await create_pipelinesinglescriptdocker(datajob);
+          pipelinename = datajob.name + "-docker";
+        } else if (tipe_deploy == "pm2") {
+          script = await create_pipelinescriptpm2(datajob);
+          pipelinename = datajob.name + "-pm2";
+        } else if (tipe_deploy == "artifact") {
+          script = await create_pipelinesinglescriptartifact(datajob);
+          pipelinename = datajob.name + "-artifact";
+        } else if (tipe_deploy == "dbmysql") {
+          script = await create_pipelinesinglesDB(datajob);
+          pipelinename = datajob.name + "-Db-mysql";
+        }
       }
-    }
-  });
+    });
 
-  console.log(script);
-  await axios({
-    method: "post",
-    url: `${jenkinsUrl}/createItem?name=${pipelinename}&mode=Pipeline`,
-    headers: {
-      Authorization: `Basic ${Buffer.from(username + ":" + apiToken).toString("base64")}`,
-      "Content-Type": "application/xml",
-    },
-    data: script,
-  });
+    console.log(script);
+    await axios({
+      method: "post",
+      url: `${jenkinsUrl}/createItem?name=${pipelinename}&mode=Pipeline`,
+      headers: {
+        Authorization: `Basic ${Buffer.from(username + ":" + apiToken).toString("base64")}`,
+        "Content-Type": "application/xml",
+      },
+      data: script,
+    });
 
-  response.ok({ pesan: "Pipeline created successfully" }, 200, res);
-
-  // } catch (error) {
-  //   console.error("Error creating pipeline:", error.response && error.response.data);
-  //   response.ok({ pesan: error.response && error.response.data }, 200, res);
-  // }
+    response.ok({ pesan: "Pipeline created successfully" }, 200, res);
+  } catch (error) {
+    console.error("Error creating pipeline:", error.response && error.response.data);
+    response.ok({ pesan: error.response && error.response.data }, 200, res);
+  }
 };
 
 exports.createGroupJobPipeline = async function (req, res) {

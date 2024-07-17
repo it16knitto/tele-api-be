@@ -1,6 +1,5 @@
 "use strict";
 var response = require("../res/res");
-var connection = require("../conn/conn");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config.js");
 const tabel = require("../conn/tabel");
