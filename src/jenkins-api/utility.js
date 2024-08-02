@@ -31,8 +31,18 @@ async function create_datacabang(datacabang) {
           });
         });
 
+        querystr = `SELECT * FROM job_env je JOIN data_env de ON je.id_env=de.id WHERE id_job=? and nama_cabang='semua'  `;
+        queryvalue = [id];
+        await tabel.queryDB(querystr, queryvalue).then(async (onres) => {
+          onres.rows.forEach((data) => {
+            console.log("ca", data);
+            scriptcabang += `${data.nama_variabel}: "${data.value_env}", \n`;
+          });
+        });
+
         scriptcabang += `],`;
       }
+
       scriptcabang += `]`;
     });
   } else {

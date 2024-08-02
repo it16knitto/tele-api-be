@@ -93,6 +93,7 @@ async function create_datacabang(datacabang) {
 }
 
 async function deploy_db(datajob) {
+  const { branch } = datajob;
   const MYSQLUSERNAME = "${MYSQLUSERNAME}";
   const MYSQLPASSWORD = "${MYSQLPASSWORD}";
   const sqlFile = "${sqlFile}";
@@ -128,6 +129,7 @@ async function deploy_db(datajob) {
                             def databaseHost = cabang.dbHost
                             def databasePort = cabang.dbPort
                             sh "mysql -h ${databaseHost} -P ${databasePort} -u ${MYSQLUSERNAME} -p${MYSQLPASSWORD} muliaabadi_baru < ${sqlFile}"
+                            sh "mysql -h ${databaseHost} -P ${databasePort} -u ${MYSQLUSERNAME} -p${MYSQLPASSWORD} -e \\"INSERT INTO data_branch_db VALUES(null,'${branch}',now(),0);\\" muliaabadi_baru"
                            }
                         }
                     }

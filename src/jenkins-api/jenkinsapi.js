@@ -7,6 +7,7 @@ const { create_pipelinesinglescriptdocker } = require("../jenkins-api/create_pip
 const { create_pipelinescriptpm2 } = require("../jenkins-api/create_pipelinepm2");
 const { create_pipelinesinglescriptartifact } = require("../jenkins-api/create_pipelineartifac");
 const { create_pipelinesinglesDB } = require("../jenkins-api/create_pipelineDbMysql");
+const { create_pipelinesinglescriptwebsite } = require("../jenkins-api/create_pipelinewebsite");
 
 // Instance Axios dengan dukungan cookie
 const jenkinsUrl = "http://192.168.20.12:8080"; // Ganti dengan URL Jenkins Anda
@@ -42,6 +43,9 @@ exports.createPipeline = async function (req, res) {
         } else if (tipe_deploy == "dbmysql") {
           script = await create_pipelinesinglesDB(datajob);
           pipelinename = datajob.name + "-Db-mysql";
+        } else if (tipe_deploy == "website") {
+          script = await create_pipelinesinglescriptwebsite(datajob);
+          pipelinename = datajob.name + "-website";
         }
       }
     });
