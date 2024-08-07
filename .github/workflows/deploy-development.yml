@@ -1,0 +1,28 @@
+name: Send Trigger Development
+
+on:
+  push:
+    branches:
+      - dev
+
+env:
+  PROJECT_NAME: knitto_jenkins_apps_dev
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish message to RabbitMQ
+        uses: knittotextile/rabbitmq-publish-message@v0
+        with:
+          app_id: remote-build
+          rabbitmq_host: ${{ secrets.RABBITMQ_HOST }}
+          rabbitmq_username: ${{ secrets.RABBITMQ_USER }}
+          rabbitmq_password: ${{ secrets.RABBITMQ_PASS }}
+          queue_name: jenkins-build-trigger-20-20
+          message: >
+            {
+              "project": "${{ env.PROJECT_NAME }}",
+              "token": "${{ secrets.JENKINS_RABBITMQ_TOKEN_DEV }}",
+              "parameter": []
+            }
