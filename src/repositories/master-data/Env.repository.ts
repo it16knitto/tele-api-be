@@ -1,24 +1,22 @@
 import { EntityRepo } from '@knittotextile/knitto-mysql';
-import { CabangEntity } from '@root/entities/cabang/Cabang.entity';
-export default class CabangRepository extends EntityRepo<CabangEntity> {
-	tableName = 'cabang';
+export default class EnvRepository extends EntityRepo<Entity.Env> {
+	tableName = 'data_env';
 
 	async findAll(perPage: number, page: number, search?: string) {
 		let query = `SELECT * FROM ${this.tableName}`;
 		const values = [];
 
 		if (search) {
-			query += ' WHERE name LIKE ? OR tipe_cabang LIKE ?';
+			query += ' WHERE nama_env LIKE ? OR catatan_env LIKE ?';
 			values.push(`%${search}%`, `%${search}%`);
 		}
 
 		const data = await this.dbConnector.basicPaginate({
 			query,
+			value: values,
 			perPage,
-			page,
-			value: values
+			page
 		});
-
 		return data;
 	}
 }

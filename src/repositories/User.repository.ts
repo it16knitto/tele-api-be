@@ -1,5 +1,5 @@
 import { EntityRepo } from '@knittotextile/knitto-mysql';
-export default class UserRepository extends EntityRepo<UserEntity> {
+export default class UserRepository extends EntityRepo<Entity.User> {
 	tableName = 'user';
 
 	async findOneByUsername(username: string) {

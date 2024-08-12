@@ -1,5 +1,5 @@
 import { EntityRepo } from '@knittotextile/knitto-mysql';
-export default class JobRepository extends EntityRepo<JobEntity> {
+export default class JobRepository extends EntityRepo<Entity.Job> {
 	tableName = 'job';
 
 	async findAll(perPage: number, page: number, search?: string) {
@@ -23,7 +23,7 @@ export default class JobRepository extends EntityRepo<JobEntity> {
 		});
 		return data;
 	}
-	async insert(data: JobEntity): Promise<any> {
+	async insert(data: Entity.Job): Promise<any> {
 		data.create_date = new Date();
 		return await super.insert(data);
 	}

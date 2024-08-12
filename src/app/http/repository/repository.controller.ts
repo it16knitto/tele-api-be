@@ -1,12 +1,13 @@
 import { TRequestFunction } from '@knittotextile/knitto-http';
 import mysqlConnection from '@root/libs/config/mysqlConnection';
 import { fetchGithubRepos } from '@root/libs/helpers/fetch';
-import RepositoryRepository from '@root/repositories/repository/Repository.repository';
 import { TRepositoryValidation } from './repository.request';
+import RepositoryRepository from '@root/repositories/master-data/Repository.repository';
+import { githubConfig } from '@root/libs/config';
 
-const githuburl = 'https://api.github.com';
-const apiToken = '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';
-const username = 'knittotextile';
+const githuburl = githubConfig.URL;
+const apiToken = githubConfig.API_TOKEN;
+const username = githubConfig.USERNAME;
 
 export const repositoryFetch: TRequestFunction = async () => {
 	const element = await fetchGithubRepos(githuburl, username, apiToken, 1, 350);
@@ -26,7 +27,7 @@ export const repositoryFetch: TRequestFunction = async () => {
 			}
 		}
 	}
-	return { result: 'ok' };
+	return { message: 'Successfully' };
 };
 
 export const repositoryFindAll: TRequestFunction = async (req) => {

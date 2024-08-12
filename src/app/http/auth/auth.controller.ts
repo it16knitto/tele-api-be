@@ -4,7 +4,7 @@ import { InvalidParameterException } from '@knittotextile/knitto-core-backend/di
 import mysqlConnection from '@root/libs/config/mysqlConnection';
 import CreateCredentialJWT from '@root/services/CreateCredentialJWT';
 import bcryptjs from 'bcryptjs';
-import UserRepository from '@root/repositories/user/User.repository';
+import UserRepository from '@root/repositories/User.repository';
 
 export const authLogin: TRequestFunction = async (req) => {
 	const { username, password } = req.body as TLoginValidation;

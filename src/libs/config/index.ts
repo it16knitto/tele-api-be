@@ -25,8 +25,15 @@ export const rabbitMQConfig = {
 };
 
 export const jenkinsConfig = {
-	URL: process.env.JENKINS_URL || 'http://192.168.20.12:8080',
+	URL: process.env.JENKINS_URL || '',
 	API_TOKEN:
-		process.env.JENKINS_API_TOKEN || '1161bce0b3fda8c0c17b8808fb67b1df11',
-	USERNAME: process.env.JENKINS_USERNAME || 'it-knitto'
+		process.env.JENKINS_API_TOKEN || '',
+	USERNAME: process.env.JENKINS_USERNAME || ''
+};
+
+export const githubConfig = {
+	URL: process.env.GITHUB_URL || 'https://api.github.com',
+	API_TOKEN:
+		process.env.GITHUB_API_TOKEN || '',
+	USERNAME: process.env.GITHUB_USERNAME || ''
 };
