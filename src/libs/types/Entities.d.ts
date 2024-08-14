@@ -48,6 +48,7 @@ declare namespace Entity {
 		url_repo?: string;
 		tipe_runtime?: string;
 		job_name?: string;
+		status_last_build?: string;
 	}
 
 	interface JobCabang {
@@ -75,6 +76,8 @@ declare namespace Entity {
 		id_job?: number;
 		id_group?: number;
 		stage_name?: string;
+		order?: number;
+		status_last_build?: string;
 	}
 
 	interface HistoryJob {

@@ -1,5 +1,9 @@
 import mysqlConnection from '@root/libs/config/mysqlConnection';
-import { checkoutGit, createDataCabang } from './utility';
+import {
+	checkoutGit,
+	createDataCabang,
+	declarativePostActions
+} from './utility';
 
 export function build_artifac() {
 	const job_name = '${JOB_NAME}';
@@ -90,6 +94,7 @@ export async function createPipelineSingleScriptArtifact(dataJob: Entity.Job) {
 	const build = build_artifac();
 
 	const deploy = await deploy_artifact(dataJob.id, dataJob.app_port);
+	const declarativePostActionsScript = declarativePostActions();
 	const data_cabang = await createDataCabang(
 		dataJob.id,
 		dataJob.cabang,
@@ -101,6 +106,11 @@ export async function createPipelineSingleScriptArtifact(dataJob: Entity.Job) {
        ${data_cabang}
         pipeline {
            agent any
+            parameters {
+                string(name: 'GROUP_JOB_ID', defaultValue: null, description: 'Group Job ID')
+                string(name: 'WEBHOOK_URL', defaultValue: '', description: 'Webhook endpoint URL')
+                string(name: 'RUN_TYPE', defaultValue: '', description: 'Webhook endpoint URL')
+            }
             environment {
               TOKEN_SECRET = credentials('193dd6e9-4d6d-4746-bb4b-723285acbf02') 
               HOST_IMG_REGISTRY = 'asia-southeast2-docker.pkg.dev/indigo-proxy-293308/knitto'
@@ -112,6 +122,7 @@ export async function createPipelineSingleScriptArtifact(dataJob: Entity.Job) {
                  ${deploy}
             }
           }
+            ${declarativePostActionsScript}
         }
      `;
 	return script;

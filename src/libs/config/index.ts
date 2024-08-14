@@ -26,14 +26,13 @@ export const rabbitMQConfig = {
 
 export const jenkinsConfig = {
 	URL: process.env.JENKINS_URL || '',
-	API_TOKEN:
-		process.env.JENKINS_API_TOKEN || '',
-	USERNAME: process.env.JENKINS_USERNAME || ''
+	API_TOKEN: process.env.JENKINS_API_TOKEN || '',
+	USERNAME: process.env.JENKINS_USERNAME || '',
+	WEBHOOK: process.env.JENKINS_WEBHOOK_URL || ''
 };
 
 export const githubConfig = {
 	URL: process.env.GITHUB_URL || 'https://api.github.com',
-	API_TOKEN:
-		process.env.GITHUB_API_TOKEN || '',
+	API_TOKEN: process.env.GITHUB_API_TOKEN || '',
 	USERNAME: process.env.GITHUB_USERNAME || ''
 };

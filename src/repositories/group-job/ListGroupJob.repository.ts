@@ -8,11 +8,13 @@ export default class ListJobGroupRepository extends EntityRepo<Entity.ListGroupJ
 	}
 	async createMany(arrJobs: number[], id_group: number): Promise<any> {
 		const data: Entity.ListGroupJob[] = [];
+		let order = 1;
 		for (const job of arrJobs) {
 			data.push({
 				id_job: job,
 				id_group,
-				create_date: new Date()
+				create_date: new Date(),
+				order: order++
 			});
 		}
 		return await super.insertMany(data);

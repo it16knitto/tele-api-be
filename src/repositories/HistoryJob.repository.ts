@@ -13,16 +13,16 @@ export default class HistoryJobRepository extends EntityRepo<Entity.HistoryJob> 
 		tanggal_awal?: string,
 		tanggal_akhir?: string
 	) {
-		let query = `SELECT * FROM ${this.tableName}`;
+		let query = `SELECT history_job.*, user.fullname FROM ${this.tableName} JOIN user ON history_job.id_user = user.id`;
 		const values = [];
 		if (search) {
-			query += ' WHERE nama_job LIKE ?';
+			query += ' WHERE history_job.nama_job LIKE ?';
 			values.push(`%${search}%`);
 		} else {
-			query += ' WHERE nama_job is not null';
+			query += ' WHERE history_job.nama_job is not null';
 		}
 		if (tanggal_awal && tanggal_akhir) {
-			query += ' AND create_date BETWEEN ? AND ?';
+			query += ' AND history_job.create_date BETWEEN ? AND ?';
 			values.push(tanggal_awal, tanggal_akhir);
 		}
 		const data = await this.dbConnector.basicPaginate({

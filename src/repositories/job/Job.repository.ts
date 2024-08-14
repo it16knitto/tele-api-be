@@ -14,6 +14,7 @@ export default class JobRepository extends EntityRepo<Entity.Job> {
 		}
 
 		query += ' GROUP BY job.id';
+		query += ' ORDER BY job.create_date desc';
 
 		const data = await this.dbConnector.basicPaginate({
 			query,

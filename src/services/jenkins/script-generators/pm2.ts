@@ -1,4 +1,8 @@
-import { checkoutGit, createDataCabang } from './utility';
+import {
+	checkoutGit,
+	createDataCabang,
+	declarativePostActions
+} from './utility';
 
 export async function buildPm2() {
 	return `stage('Install npm dependencies') {
@@ -78,6 +82,7 @@ export async function createPipelineScriptPm2(dataJob: Entity.Job) {
 	const build = buildPm2();
 	const compress = compressPm2();
 	const deploy = deployPm2();
+	const declarativePostActionsScript = declarativePostActions();
 	const data_cabang = await createDataCabang(
 		dataJob.id,
 		dataJob.cabang,
@@ -88,12 +93,18 @@ export async function createPipelineScriptPm2(dataJob: Entity.Job) {
     ${data_cabang}
      pipeline {
        agent any
+       parameters {
+                string(name: 'GROUP_JOB_ID', defaultValue: null, description: 'Group Job ID')
+                string(name: 'WEBHOOK_URL', defaultValue: '', description: 'Webhook endpoint URL')
+                string(name: 'RUN_TYPE', defaultValue: '', description: 'Webhook endpoint URL')
+        }
        stages {
              ${checkoutGitScript}
              ${build}
              ${compress}
               ${deploy}
          }
+            ${declarativePostActionsScript}
        }
   `;
 

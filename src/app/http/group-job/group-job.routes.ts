@@ -8,7 +8,8 @@ import authorizeMiddlware from '../middlewares/authorization';
 import {
 	groupJobCreate,
 	groupJobFind,
-	groupJobFindJobs
+	groupJobFindJobs,
+	groupJobRun
 } from './group-job.controller';
 const router = Router();
 /**
@@ -108,5 +109,24 @@ router.get(
 	}),
 	authorizeMiddlware,
 	requestHandler(groupJobFindJobs)
+);
+
+/**
+ * POST /group-job/{id}/run
+ * @tags Group Job
+ * @summary group job run
+ * @security BearerAuth
+ * @param {number} id.path.required - number
+ * @return {object} 201 - success
+ * @example response - 201 - success
+ * {
+ *   "message": "Success",
+ *   "result": null
+ * }
+ */
+router.post(
+	'/group-job/:id/run',
+	authorizeMiddlware,
+	requestHandler(groupJobRun)
 );
 export default router;

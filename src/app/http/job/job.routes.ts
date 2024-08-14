@@ -294,4 +294,6 @@ router.delete(
 	authorizeMiddlware,
 	requestHandler(jobController.jobDelete)
 );
+
+router.post('/job/webhook', requestHandler(jobController.jobWebhook));
 export default router;

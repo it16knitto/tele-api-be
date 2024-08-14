@@ -9,7 +9,10 @@ import { createPipelineSingleScriptArtifact } from './script-generators/artifact
 const jenkinsUrl = jenkinsConfig.URL;
 const apiToken = jenkinsConfig.API_TOKEN;
 const username = jenkinsConfig.USERNAME;
-
+export enum EnumRunTypeJob {
+	single = 'single',
+	groupjob = 'group-job'
+}
 export const jenkinsGeneratePipelineScript = async (
 	id_job: number,
 	tipe_runtime_pipeline: string
@@ -125,6 +128,39 @@ export const jenkinsDeleteJobItem = async (pipelineName: string) => {
 			}
 		});
 		return response;
+	} catch (e) {
+		throw e;
+	}
+};
+
+export const jenkinsRunJobItemWithParams = async (
+	pipelineName: string,
+	run_type?: EnumRunTypeJob,
+	group_job_id?: string
+) => {
+	try {
+		const formdata = new FormData();
+		formdata.append('GROUP_JOB_ID', group_job_id ?? '');
+		formdata.append('WEBHOOK_URL', jenkinsConfig.WEBHOOK);
+		formdata.append('RUN_TYPE', run_type);
+		const response = await fetch(
+			`${jenkinsUrl}/job/${pipelineName}/buildWithParameters`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Basic ${Buffer.from(
+						username + ':' + apiToken
+					).toString('base64')}`
+				},
+				body: formdata
+			}
+		);
+
+		if (response.ok) {
+			return true;
+		} else {
+			throw new Error(`Failed to run job: ${pipelineName}`);
+		}
 	} catch (e) {
 		throw e;
 	}

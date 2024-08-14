@@ -1,5 +1,9 @@
 import mysqlConnection from '@root/libs/config/mysqlConnection';
-import { checkoutGit, createDataCabang } from './utility';
+import {
+	checkoutGit,
+	createDataCabang,
+	declarativePostActions
+} from './utility';
 
 export function buildDocker(): string {
 	let jobname = '${JOB_NAME}';
@@ -102,6 +106,7 @@ export async function createPipelineScriptDocker(dataJob: Entity.Job) {
 	const build = buildDocker();
 	const compress = compressDocker();
 	const deploy = await deployDocker(dataJob.id, dataJob.app_port);
+	const declarativePostActionsScript = declarativePostActions();
 	const data_cabang = await createDataCabang(
 		dataJob.id,
 		dataJob.cabang,
@@ -112,6 +117,11 @@ export async function createPipelineScriptDocker(dataJob: Entity.Job) {
     ${data_cabang}
      pipeline {
         agent any
+        parameters {
+            string(name: 'GROUP_JOB_ID', defaultValue: null, description: 'Group Job ID')
+            string(name: 'WEBHOOK_URL', defaultValue: '', description: 'Webhook endpoint URL')
+            string(name: 'RUN_TYPE', defaultValue: '', description: 'Webhook endpoint URL')
+        }
          environment {
              def TOKEN_SECRET = credentials('193dd6e9-4d6d-4746-bb4b-723285acbf02') 
          }
@@ -123,6 +133,7 @@ export async function createPipelineScriptDocker(dataJob: Entity.Job) {
               ${deploy}
          }
        }
+         ${declarativePostActionsScript}
      }
      
   `;

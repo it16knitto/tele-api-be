@@ -1,4 +1,8 @@
-import { checkoutGit, createDataCabang } from './utility';
+import {
+	checkoutGit,
+	createDataCabang,
+	declarativePostActions
+} from './utility';
 
 export async function deployDb(branch: string) {
 	const MYSQLUSERNAME = '${MYSQLUSERNAME}';
@@ -48,6 +52,7 @@ export async function deployDb(branch: string) {
 export async function createPipelineSinglesDB(datajob: Entity.Job) {
 	const checkoutGitScript = checkoutGit(datajob.branch, datajob.url_repo);
 	const deploy = await deployDb(datajob.branch);
+	const declarativePostActionsScript = declarativePostActions();
 	const data_cabang = await createDataCabang(
 		datajob.id,
 		datajob.cabang,
@@ -58,16 +63,22 @@ export async function createPipelineSinglesDB(datajob: Entity.Job) {
      ${data_cabang}
       pipeline {
          agent any
+         parameters {
+            string(name: 'GROUP_JOB_ID', defaultValue: null, description: 'Group Job ID')
+            string(name: 'WEBHOOK_URL', defaultValue: '', description: 'Webhook endpoint URL')
+            string(name: 'RUN_TYPE', defaultValue: '', description: 'Webhook endpoint URL')
+        }
            environment {
         MYSQLUSERNAME  = 'deployment' 
         MYSQLPASSWORD  = 'ka5vrSq5ATyGQxK4@'
-    }
+        }
     
         stages {
               ${checkoutGitScript}
               ${deploy}
           }
         }
+          ${declarativePostActionsScript}
       }
    `;
 	return script;

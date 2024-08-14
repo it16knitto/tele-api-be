@@ -17,10 +17,11 @@ import { NotFoundException } from '@knittotextile/knitto-core-backend/dist/CoreE
 import RepositoryRepository from '@root/repositories/master-data/Repository.repository';
 import EnvRepository from '@root/repositories/master-data/Env.repository';
 import {
+	EnumRunTypeJob,
 	jenkinsDeleteJobItem,
 	jenkinsGeneratePipelineScript,
 	jenkinsPostCreateJobItem,
-	jenkinsRunJobItem,
+	jenkinsRunJobItemWithParams,
 	jenkinsStatusJobItem
 } from '@root/services/jenkins/jenkins.service';
 import {
@@ -28,6 +29,7 @@ import {
 	headerXML
 } from '@root/services/jenkins/script-generators/utility';
 import HistoryJobRepository from '@root/repositories/HistoryJob.repository';
+import ListJobGroupRepository from '@root/repositories/group-job/ListGroupJob.repository';
 
 const jobFind: TRequestFunction = async (req) => {
 	const { search, perPage, page } = req.query as unknown as TGetJobValidation;
@@ -99,11 +101,18 @@ const jobCreate: TRequestFunction = async (req) => {
 
 	const pipelineNameJenkins = `${name}-${jenis_server}-${tipe_runtime_pipeline}`;
 	try {
+		const arrCabang: number[] = [...new Set(cabang)];
+		const countCabang = await mysqlConnection
+			.raw('SELECT COUNT(id) as count FROM cabang WHERE tipe_cabang = ?', [
+				jenis_server
+			])
+			.then((result) => result[0] ?? null);
+
 		await mysqlConnection.transaction(async (trx) => {
 			const jobRepository = new JobRepository(trx);
 			const job = await jobRepository.insert({
 				name,
-				cabang: cabang.length > 0 ? 'SEBAGIAN' : 'SEMUA',
+				cabang: arrCabang.length === countCabang?.count ? 'SEMUA' : 'SEBAGIAN',
 				branch,
 				app_port,
 				app_path,
@@ -113,7 +122,7 @@ const jobCreate: TRequestFunction = async (req) => {
 				job_name: pipelineNameJenkins
 			});
 			jobId = job.insertId;
-			const arrCabang: number[] = cabang;
+
 			if (cabang.length === 0) {
 				const findCabang: any[] = await trx.raw(
 					'select * from cabang where tipe_cabang = ?',
@@ -133,9 +142,9 @@ const jobCreate: TRequestFunction = async (req) => {
 			tipe_runtime_pipeline
 		);
 		const xmlData = `${headerXML}
-			${scriptPipeline}
-		 ${footerXML}
-	  `;
+				${scriptPipeline}
+			 ${footerXML}
+		  `;
 		const postJenkinsCreatePipeline = await jenkinsPostCreateJobItem(
 			xmlData,
 			pipelineNameJenkins
@@ -152,7 +161,7 @@ const jobCreate: TRequestFunction = async (req) => {
 		return {
 			message: 'Job created successfully',
 			statusCode: 201,
-			result: { jobId, scriptPipeline }
+			result: null
 		};
 	} catch (e: any) {
 		throw new Error(e.message ? e.message : 'An error occurred');
@@ -173,7 +182,10 @@ const jobRun: TRequestFunction = async (req: any) => {
 		throw new NotFoundException('job not found in database');
 	}
 	try {
-		const run = await jenkinsRunJobItem(data.job_name);
+		const run = await jenkinsRunJobItemWithParams(
+			data.job_name,
+			EnumRunTypeJob.single
+		);
 		await mysqlConnection.transaction(async (trx) => {
 			await new HistoryJobRepository(trx).insert({
 				nama_job: data.job_name,
@@ -225,7 +237,45 @@ const jobDelete: TRequestFunction = async (req) => {
 		throw new Error(e.message ? e.message : 'An error occurred');
 	}
 };
-
+const jobWebhook: TRequestFunction = async (req) => {
+	const { status, job_name, group_job_id, run_type } = req.body;
+	try {
+		switch (run_type) {
+			case EnumRunTypeJob.single:
+				await mysqlConnection.transaction(async (trx) => {
+					await new JobRepository(trx).update(
+						{ status_last_build: status.toUpperCase() },
+						{ job_name }
+					);
+				});
+				break;
+			case EnumRunTypeJob.groupjob:
+				const job = await mysqlConnection
+					.raw('select id from job where job_name = ?', [job_name])
+					.then((result) => result[0] ?? null);
+				if (!job) {
+					break;
+				}
+				await mysqlConnection.transaction(async (trx) => {
+					await new ListJobGroupRepository(trx).update(
+						{ status_last_build: status.toUpperCase() },
+						{ id_group: group_job_id, id_job: job.id }
+					);
+				});
+				break;
+			default:
+				await mysqlConnection.transaction(async (trx) => {
+					await new JobRepository(trx).update(
+						{ status_last_build: status.toUpperCase() },
+						{ job_name }
+					);
+				});
+		}
+		return { statusCode: 201, result: null };
+	} catch (e) {
+		throw e;
+	}
+};
 export default {
 	jobFind,
 	jobEnvFind,
@@ -236,5 +286,6 @@ export default {
 	jobComboBoxPilihJenisRuntime,
 	jobRun,
 	jobStatus,
-	jobDelete
+	jobDelete,
+	jobWebhook
 };
