@@ -2,20 +2,15 @@ import { TRequestFunction } from '@knittotextile/knitto-http';
 import mysqlConnection from '@root/libs/config/mysqlConnection';
 import JobRepository from '@root/repositories/job/Job.repository';
 import {
-	TGetJobComboBoxPilihCabangValidation,
 	TGetJobEnvValidation,
 	TGetJobValidation,
 	TipeRuntimePipelineEnum,
 	TPostJobValidation
 } from './job.request';
-import { TRepositoryValidation } from '../repository/repository.request';
-import { TEnvValidation } from '../env/env.request';
 import JobCabangRepository from '@root/repositories/job/JobCabang.repository';
 import JobEnvRepository from '@root/repositories/job/JobEnv.repository';
 
 import { NotFoundException } from '@knittotextile/knitto-core-backend/dist/CoreException';
-import RepositoryRepository from '@root/repositories/master-data/Repository.repository';
-import EnvRepository from '@root/repositories/master-data/Env.repository';
 import {
 	EnumRunTypeJob,
 	jenkinsDeleteJobItem,
@@ -49,39 +44,6 @@ const jobEnvFind: TRequestFunction = async (req) => {
 		perPage,
 		page
 	});
-	return { result: data };
-};
-
-const jobComboBoxPilihCabang: TRequestFunction = async (req) => {
-	const { server } =
-		req.query as unknown as TGetJobComboBoxPilihCabangValidation;
-	const data = await mysqlConnection.raw(
-		'SELECT * FROM cabang WHERE tipe_cabang = ?',
-		[server]
-	);
-	return { result: data };
-};
-
-const jobComboBoxPilihRepository: TRequestFunction = async (req) => {
-	const { perPage, page, search } =
-		req.query as unknown as TRepositoryValidation;
-	try {
-		const repositoryRepository = new RepositoryRepository(mysqlConnection);
-		const repos = await repositoryRepository.findAll(
-			+perPage || 10,
-			+page || 1,
-			search
-		);
-		return { result: repos };
-	} catch (error) {
-		throw new Error(error as string);
-	}
-};
-
-const jobComboBoxPilihEnv: TRequestFunction = async (req) => {
-	const { search, perPage, page } = req.query as unknown as TEnvValidation;
-	const envRepository = new EnvRepository(mysqlConnection);
-	const data = await envRepository.findAll(perPage, page, search);
 	return { result: data };
 };
 
@@ -182,10 +144,7 @@ const jobRun: TRequestFunction = async (req: any) => {
 		throw new NotFoundException('job not found in database');
 	}
 	try {
-		const run = await jenkinsRunJobItemWithParams(
-			data.job_name,
-			EnumRunTypeJob.single
-		);
+		await jenkinsRunJobItemWithParams(data.job_name, EnumRunTypeJob.single);
 		await mysqlConnection.transaction(async (trx) => {
 			await new HistoryJobRepository(trx).insert({
 				nama_job: data.job_name,
@@ -194,7 +153,7 @@ const jobRun: TRequestFunction = async (req: any) => {
 				jenis_job: 'Job'
 			});
 		});
-		return { result: run };
+		return { statusCode: 201, result: null };
 	} catch (e: any) {
 		throw new Error(e.message ? e.message : 'An error occurred');
 	}
@@ -211,7 +170,16 @@ const jobStatus: TRequestFunction = async (req) => {
 		}
 
 		const status = await jenkinsStatusJobItem(data.job_name);
-		return { result: status };
+		const result = {
+			status: status.result,
+			timestamp: status.timestamp,
+			duration: status.duration,
+			estimated_duration: status.estimatedDuration,
+			number: status.number,
+			queue_id: status.queueId,
+			url: status.url
+		};
+		return { result };
 	} catch (e: any) {
 		throw new Error(e.message ? e.message : 'An error occurred');
 	}
@@ -279,9 +247,6 @@ const jobWebhook: TRequestFunction = async (req) => {
 export default {
 	jobFind,
 	jobEnvFind,
-	jobComboBoxPilihCabang,
-	jobComboBoxPilihRepository,
-	jobComboBoxPilihEnv,
 	jobCreate,
 	jobComboBoxPilihJenisRuntime,
 	jobRun,

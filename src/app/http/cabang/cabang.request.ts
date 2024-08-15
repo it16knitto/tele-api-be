@@ -28,6 +28,14 @@ const getCabangValidation = object({
 });
 export type TCabangValidation = InferOutput<typeof getCabangValidation>;
 
+const getCabangComboBoxValidation = object({
+	server: string(ERROR_VALIDATION_MSG.string('server'))
+});
+export type TCabangComboBoxValidation = InferOutput<
+	typeof getCabangComboBoxValidation
+>;
+
 export default {
-	getCabangValidation
+	getCabangValidation,
+	getCabangComboBoxValidation
 };

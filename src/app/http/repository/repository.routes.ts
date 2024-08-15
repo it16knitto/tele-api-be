@@ -1,5 +1,9 @@
 import { Router, requestHandler } from '@knittotextile/knitto-http';
-import { repositoryFetch, repositoryFindAll } from './repository.controller';
+import {
+	repositoryFetch,
+	repositoryFindAll,
+	repositoryFindComboBox
+} from './repository.controller';
 import authorizeMiddlware from '../middlewares/authorization';
 const repositoryRouter = Router();
 
@@ -11,11 +15,9 @@ const repositoryRouter = Router();
  * @return {object} 200 - success
  * @example response - 200 - success
  * {
- *   "message": "Success",
- *   "result": {
- *     "result": "ok"
- *   }
- * }
+  "message": "Successfully",
+  "result": null
+}
  */
 repositoryRouter.get(
 	'/repository/fetch',
@@ -60,5 +62,29 @@ repositoryRouter.get(
 	'/repository',
 	authorizeMiddlware,
 	requestHandler(repositoryFindAll)
+);
+
+/**
+ * GET /repository/combo-box
+ * @tags Repository
+ * @summary combo box pilih repository
+ * @security BearerAuth
+ * @return {object} 200 - success
+ * @example response - 200 - success
+ * {
+  "message": "Success",
+  "result": [
+    {
+      "id": 616,
+      "name": "order-web-knitto",
+      "url": "https://github.com/knittotextile/order-web-knitto"
+    }
+  ]
+}
+ */
+repositoryRouter.get(
+	'/repository/combo-box',
+	authorizeMiddlware,
+	requestHandler(repositoryFindComboBox)
 );
 export default repositoryRouter;

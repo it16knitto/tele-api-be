@@ -23,10 +23,24 @@ const router = Router();
  * @return {object} 200 - success
  * @example response - 200 - success
  * {
- *   "message": "Success",
- *   "result": {
- *   }
- * }
+  "message": "Success",
+  "result": {
+    "data": [
+      {
+        "id": 1,
+        "create_date": "2024-05-30T01:44:24.000Z",
+        "nama_job": "Testing Group Job",
+        "catatan": "untuk deploy job docker-penimbangan  dan docker-penimbangan-holis-kej"
+      }
+    ],
+    "paginate": {
+      "page": 1,
+      "perPage": 10,
+      "totalItem": 11,
+      "totalPage": 2
+    }
+  }
+}
  */
 router.get(
 	'/group-job',
@@ -90,7 +104,7 @@ router.post(
           "jenis_server": "string",
           "url_repo": "string",
           "id_group": 0
-        },
+        }
       ],
  *     "paginate": {
  *       "page": 0,

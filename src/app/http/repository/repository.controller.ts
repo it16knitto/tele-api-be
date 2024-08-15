@@ -45,3 +45,10 @@ export const repositoryFindAll: TRequestFunction = async (req) => {
 		throw new Error(error as string);
 	}
 };
+
+export const repositoryFindComboBox: TRequestFunction = async () => {
+	const data = await mysqlConnection.raw(
+		'select id, name, url from repository'
+	);
+	return { result: data };
+};

@@ -9,3 +9,7 @@ export const envFind: TRequestFunction = async (req) => {
 	const data = await envRepository.findAll(perPage, page, search);
 	return { result: data };
 };
+export const envFindComboBox: TRequestFunction = async () => {
+	const data = await mysqlConnection.raw('select * from data_env');
+	return { result: data };
+};

@@ -1,6 +1,4 @@
 import jobRequest from './job.request';
-import repositoryRequest from '../repository/repository.request';
-import envRequest from '../env/env.request';
 import {
 	Router,
 	requestHandler,
@@ -21,10 +19,33 @@ const router = Router();
  * @return {object} 200 - success
  * @example response - 200 - success
  * {
- *   "message": "Success",
- *   "result": {
- *   }
- * }
+  "message": "Success",
+  "result": {
+    "data": [
+      {
+        "id": 59,
+        "create_date": "2024-08-14T03:18:38.000Z",
+        "name": "test-timbangan",
+        "cabang": "SEMUA",
+        "branch": "dev",
+        "app_port": 8399,
+        "app_path": "",
+        "jenis_server": "sandbox",
+        "url_repo": "https://github.com/knittotextile/knitto-api-timbangan",
+        "tipe_runtime": "artifact",
+        "job_name": "test-timbangan-sandbox-artifact",
+        "status_last_build": "FAILURE",
+        "nama_cabang": "holis, surabaya, semarang, yogya, kebon-jukut"
+      }
+    ],
+    "paginate": {
+      "page": 1,
+      "perPage": 10,
+      "totalItem": 6,
+      "totalPage": 1
+    }
+  }
+}
  */
 router.get(
 	'/job',
@@ -73,123 +94,6 @@ router.get(
 );
 
 /**
- * GET /job/combo-box-pilih-cabang
- * @tags Job
- * @summary combo box pilih cabang
- * @security BearerAuth
- * @param {string} server.query.required - string enum:sandbox,production
- * @return {object} 200 - success
- * @example response - 200 - success
- * {
- *   "message": "Success",
- *   "result": [
- *     {
- *       "id": 0,
- *       "nama_cabang": "string"
- *     }
- *   ]
- * }
- */
-router.get(
-	'/job/combo-box-pilih-cabang',
-	requestValidator({
-		requestType: 'query',
-		type: jobRequest.getJobComboBoxPilihCabangValidation
-	}),
-	authorizeMiddlware,
-	requestHandler(jobController.jobComboBoxPilihCabang)
-);
-
-/**
- * GET /job/combo-box-pilih-repository
- * @tags Job
- * @summary combo box pilih repository
- * @security BearerAuth
- * @param {string} search.query - string
- * @param {number} perPage.query.required - number
- * @param {number} page.query.required - number
- * @return {object} 200 - success
- * @return {object} 400 - bad request
- * @example response - 200 - success
- * {
-  "message": "Success",
-  "result": {
-    "data": [
-      {
-        "id": 1,
-        "create_date": "1970-01-01T00:00:00.000Z",
-        "name": "string",
-        "url": "string",
-        "app_port": 0,
-        "app_path": "string",
-        "status_aktif": "string"
-      }
-    ],
-    "paginate": {
-      "page": 1,
-      "perPage": 1,
-      "totalItem": 1,
-      "totalPage": 1
-    }
-  }
-}
- */
-router.get(
-	'/job/combo-box-pilih-repository',
-	requestValidator({
-		requestType: 'query',
-		type: repositoryRequest.getRepositoryValidation
-	}),
-	authorizeMiddlware,
-	requestHandler(jobController.jobComboBoxPilihRepository)
-);
-
-/**
- * GET /job/combo-box-pilih-env
- * @tags Job
- * @summary combo box pilih env
- * @security BearerAuth
- * @param {string} search.query - string
- * @param {number} perPage.query.required - number
- * @param {number} page.query.required - number
- * @return {object} 200 - success
- * @return {object} 400 - bad request
- * @example response - 200 - success
- * {
-  "message": "Success",
-  "result": {
-    "data": [
-      {
-        "id": 1,
-        "create_date": "1970-01-01T00:00:00.000Z",
-        "catatan_env": "string",
-        "nama_env": "string",
-        "value_env": "string",
-        "nama_cabang": "string",
-        "nama_variabel": "string",
-        "script": "string"
-      }
-    ],
-    "paginate": {
-      "page": 1,
-      "perPage": 1,
-      "totalItem": 1,
-      "totalPage": 1
-    }
-  }
-}
- */
-router.get(
-	'/job/combo-box-pilih-env',
-	requestValidator({
-		requestType: 'query',
-		type: envRequest.getEnvValidation
-	}),
-	authorizeMiddlware,
-	requestHandler(jobController.jobComboBoxPilihEnv)
-);
-
-/**
  * POST /job
  * @tags Job
  * @summary create job
@@ -205,11 +109,11 @@ router.get(
  * @property {array<number>} cabang.required - The branch array
  * @property {array<number>} env.required - The environment array
  * @param {JobCreate} request.body.required - job creation request
- * @return {object} 200 - success
+ * @return {object} 201 - created
  * @return {object} 400 - bad request
- * @example response - 200 - success
+ * @example response - 201 - created
  * {
-  "message": "Success",
+  "message": "Job created successfully",
   "result": null
 }
  */
@@ -229,8 +133,17 @@ router.post(
  * @summary Get runtime pipeline options for combo box
  * @security BearerAuth
  * @return {array<string>} 200 - List of runtime pipeline options
- * @return {object} 401 - Unauthorized
- * @return {object} 500 - Internal Server Error
+ * @example response - 200 - success
+ * {
+  "message": "Success",
+  "result": [
+    "docker",
+    "pm2",
+    "artifact",
+    "Db-mysql",
+    "website"
+  ]
+}
  */
 router.get(
 	'/job/combo-box-pilih-runtime-pipeline',
@@ -244,10 +157,10 @@ router.get(
  * @summary job run
  * @security BearerAuth
  * @param {number} id.path.required - number
- * @return {object} 200 - success
- * @example response - 200 - success
+ * @return {object} 201 - created
+ * @example response - 201 - created
  * {
- *   "message": "Success",
+ *   "message": "Created",
  *   "result": null
  * }
  */
@@ -266,9 +179,17 @@ router.post(
  * @return {object} 200 - success
  * @example response - 200 - success
  * {
- *   "message": "Success",
- *   "result": null
- * }
+  "message": "Success",
+  "result": {
+    "status": "FAILURE",
+    "timestamp": 1723690607446,
+    "duration": 23044,
+    "estimated_duration": 26964,
+    "number": 6,
+    "queue_id": 442,
+    "url": "http://192.168.20.12:8080/job/test-timbangan-sandbox-artifact/6/"
+  }
+}
  */
 router.get(
 	'/job/:id/status',

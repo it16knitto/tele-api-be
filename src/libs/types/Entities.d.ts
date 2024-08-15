@@ -88,4 +88,11 @@ declare namespace Entity {
 		id_user?: number;
 		nama_job?: string;
 	}
+	interface Branch {
+		id?: number;
+		create_date?: Date;
+		id_repository?: number;
+		name?: string;
+		branch_tipe?: string;
+	}
 }

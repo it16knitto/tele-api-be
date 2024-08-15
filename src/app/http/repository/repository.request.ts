@@ -28,6 +28,14 @@ const getRepositoryValidation = object({
 });
 export type TRepositoryValidation = InferOutput<typeof getRepositoryValidation>;
 
+const getRepositoryComboBoxValidation = object({
+	search: optional(string(ERROR_VALIDATION_MSG.string('search')))
+});
+export type TRepositoryComboBoxValidation = InferOutput<
+	typeof getRepositoryComboBoxValidation
+>;
+
 export default {
-	getRepositoryValidation
+	getRepositoryValidation,
+	getRepositoryComboBoxValidation
 };

@@ -47,13 +47,6 @@ const getJobEnvValidation = object({
 });
 export type TGetJobEnvValidation = InferOutput<typeof getJobEnvValidation>;
 
-const getJobComboBoxPilihCabangValidation = object({
-	server: string(ERROR_VALIDATION_MSG.string('server'))
-});
-
-export type TGetJobComboBoxPilihCabangValidation = InferOutput<
-	typeof getJobComboBoxPilihCabangValidation
->;
 export enum TipeRuntimePipelineEnum {
 	docker = 'docker',
 	pm2 = 'pm2',
@@ -85,6 +78,5 @@ export type TPostJobValidation = InferOutput<typeof postJobValidation>;
 export default {
 	getJobValidation,
 	getJobEnvValidation,
-	getJobComboBoxPilihCabangValidation,
 	postJobValidation
 };
