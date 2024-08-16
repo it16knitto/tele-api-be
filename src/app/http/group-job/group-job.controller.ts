@@ -94,3 +94,18 @@ export const groupJobRun: TRequestFunction = async (req: any) => {
 		throw e;
 	}
 };
+export const groupJobDelete: TRequestFunction = async (req) => {
+	const { id } = req.params;
+	const data = await mysqlConnection
+		.raw('select id from group_job where id = ?', [id])
+		.then((result) => result[0]);
+	if (!data) {
+		throw new NotFoundException('Data group not found');
+	}
+
+	await mysqlConnection.transaction(async (trx) => {
+		await new GroupJobRepository(trx).remove({ id: +id });
+		await new ListJobGroupRepository(trx).remove({ id_group: +id });
+	});
+	return { result: null };
+};

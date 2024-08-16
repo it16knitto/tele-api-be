@@ -7,6 +7,7 @@ import jobGroupRequest from './group-job.request';
 import authorizeMiddlware from '../middlewares/authorization';
 import {
 	groupJobCreate,
+	groupJobDelete,
 	groupJobFind,
 	groupJobFindJobs,
 	groupJobRun
@@ -142,5 +143,24 @@ router.post(
 	'/group-job/:id/run',
 	authorizeMiddlware,
 	requestHandler(groupJobRun)
+);
+
+/**
+ * DELETE /group-job/{id}
+ * @tags Group Job
+ * @summary delete group job
+ * @security BearerAuth
+ * @param {number} id.path.required - number
+ * @return {object} 200 - success
+ * @example response - 200 - success
+ * {
+ *   "message": "Success",
+ *   "result": null
+ * }
+ */
+router.delete(
+	'/group-job/:id',
+	authorizeMiddlware,
+	requestHandler(groupJobDelete)
 );
 export default router;
