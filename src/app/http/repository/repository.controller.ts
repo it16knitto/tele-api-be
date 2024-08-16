@@ -1,6 +1,6 @@
 import { TRequestFunction } from '@knittotextile/knitto-http';
 import mysqlConnection from '@root/libs/config/mysqlConnection';
-import { fetchGithubRepos } from '@root/libs/helpers/fetch';
+import { fetchGithubBranch, fetchGithubRepos } from '@root/libs/helpers/fetch';
 import { TRepositoryValidation } from './repository.request';
 import RepositoryRepository from '@root/repositories/master-data/Repository.repository';
 import { githubConfig } from '@root/libs/config';
@@ -10,21 +10,52 @@ const apiToken = githubConfig.API_TOKEN;
 const username = githubConfig.USERNAME;
 
 export const repositoryFetch: TRequestFunction = async () => {
-	const element = await fetchGithubRepos(githuburl, username, apiToken, 1, 350);
-	for (const repo of element) {
+	const repositories = await fetchGithubRepos(
+		githuburl,
+		username,
+		apiToken,
+		1,
+		350
+	);
+	for (const repo of repositories) {
 		if (repo.name.substring(0, 3) != 'ksm') {
 			const repos: any = await mysqlConnection.raw(
 				'SELECT * FROM repository WHERE name = ?',
 				[repo.name]
 			);
-			if (repos.length == 0) {
-				await mysqlConnection.transaction(async (trx) => {
-					await trx.raw(
+			await mysqlConnection.transaction(async (trx) => {
+				let repoId: number;
+				if (repos.length == 0) {
+					const insertRepo: any = await trx.raw(
 						'insert into repository values(null,now(),?,?,0,"","AKTIF")',
 						[repo.name, repo.html_url]
 					);
-				});
-			}
+					repoId = insertRepo.insertId;
+				} else {
+					repoId = repos[0].id;
+				}
+
+				const branches = await fetchGithubBranch(
+					githuburl,
+					apiToken,
+					username,
+					repo.name
+				);
+
+				for (const branch of branches) {
+					const branchdata: any[] = await trx.raw(
+						'SELECT id FROM branch WHERE name = ? AND id_repository = ?',
+						[branch.name, repoId]
+					);
+
+					if (branchdata.length === 0) {
+						await mysqlConnection.raw(
+							'INSERT INTO branch (id, create_date, id_repository, name, branch_tipe) VALUES (null, ?, ?, ?, \'sandbox\' )',
+							[new Date(), repoId, branch.name]
+						);
+					}
+				}
+			});
 		}
 	}
 	return { message: 'Successfully' };
