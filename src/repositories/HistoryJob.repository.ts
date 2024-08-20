@@ -21,9 +21,10 @@ export default class HistoryJobRepository extends EntityRepo<Entity.HistoryJob> 
 		} else {
 			query += ' WHERE history_job.nama_job is not null';
 		}
+
 		if (tanggal_awal && tanggal_akhir) {
 			query += ' AND history_job.create_date BETWEEN ? AND ?';
-			values.push(tanggal_awal, tanggal_akhir);
+			values.push(`${tanggal_awal} 00:00:00`, `${tanggal_akhir} 23:59:59`);
 		}
 		const data = await this.dbConnector.basicPaginate({
 			query,
