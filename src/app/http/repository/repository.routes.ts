@@ -2,7 +2,8 @@ import { Router, requestHandler } from '@knittotextile/knitto-http';
 import {
 	repositoryFetch,
 	repositoryFindAll,
-	repositoryFindComboBox
+	repositoryFindComboBox,
+	repositoryFindLastFetch
 } from './repository.controller';
 import authorizeMiddlware from '../middlewares/authorization';
 const repositoryRouter = Router();
@@ -86,5 +87,26 @@ repositoryRouter.get(
 	'/repository/combo-box',
 	authorizeMiddlware,
 	requestHandler(repositoryFindComboBox)
+);
+
+/**
+ * GET /repository/last-fetch
+ * @tags Repository
+ * @summary last-fetch repository
+ * @security BearerAuth
+ * @return {object} 200 - success
+ * @example response - 200 - success
+ * {
+  "message": "Success",
+  "result": {
+    "last_fetch_repo": "2024-08-20T06:15:51.585Z",
+    "last_fetch_repo_epoch_time": 1724134551585
+  }
+}
+ */
+repositoryRouter.get(
+	'/repository/last-fetch',
+	authorizeMiddlware,
+	requestHandler(repositoryFindLastFetch)
 );
 export default repositoryRouter;

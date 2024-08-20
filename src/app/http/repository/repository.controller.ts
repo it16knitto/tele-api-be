@@ -4,6 +4,8 @@ import { fetchGithubBranch, fetchGithubRepos } from '@root/libs/helpers/fetch';
 import { TRepositoryValidation } from './repository.request';
 import RepositoryRepository from '@root/repositories/master-data/Repository.repository';
 import { githubConfig } from '@root/libs/config';
+import fs from 'fs';
+import path from 'path';
 
 const githuburl = githubConfig.URL;
 const apiToken = githubConfig.API_TOKEN;
@@ -58,6 +60,16 @@ export const repositoryFetch: TRequestFunction = async () => {
 			});
 		}
 	}
+	const fileExistLastFetch = fs.existsSync('storage/cache/last_fetch_repo');
+	if (!fileExistLastFetch) {
+		fs.mkdirSync(path.dirname('storage/cache/last_fetch_repo'), {
+			recursive: true
+		});
+
+		fs.writeFileSync('storage/cache/last_fetch_repo', new Date().toISOString());
+	} else {
+		fs.writeFileSync('storage/cache/last_fetch_repo', new Date().toISOString());
+	}
 	return { message: 'Successfully' };
 };
 
@@ -82,4 +94,23 @@ export const repositoryFindComboBox: TRequestFunction = async () => {
 		'select id, name, url from repository'
 	);
 	return { result: data };
+};
+
+export const repositoryFindLastFetch: TRequestFunction = async () => {
+	const fileExistLastFetch = fs.existsSync('storage/cache/last_fetch_repo');
+	let last_fetch_repo: string;
+
+	if (!fileExistLastFetch) {
+		last_fetch_repo = null;
+	} else {
+		last_fetch_repo = fs.readFileSync('storage/cache/last_fetch_repo', 'utf8');
+	}
+	return {
+		result: {
+			last_fetch_repo,
+			last_fetch_repo_epoch_time: last_fetch_repo
+				? new Date(last_fetch_repo).getTime()
+				: null
+		}
+	};
 };
