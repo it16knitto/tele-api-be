@@ -24,15 +24,12 @@ export const rabbitMQConfig = {
 	EXCHANGE: process.env.RABBITMQ_EXCHANGE || 'noExchange'
 };
 
-export const jenkinsConfig = {
-	URL: process.env.JENKINS_URL || '',
-	API_TOKEN: process.env.JENKINS_API_TOKEN || '',
-	USERNAME: process.env.JENKINS_USERNAME || '',
-	WEBHOOK: process.env.JENKINS_WEBHOOK_URL || ''
-};
-
-export const githubConfig = {
-	URL: process.env.GITHUB_URL || 'https://api.github.com',
-	API_TOKEN: process.env.GITHUB_API_TOKEN || '',
-	USERNAME: process.env.GITHUB_USERNAME || ''
+export const telegramConfig = {
+	API_ID: process.env.TELEGRAM_API_ID,
+	API_HASH: process.env.TELEGRAM_API_HASH,
+	APP_TITLE: process.env.TELEGRAM_APP_TITLE,
+	APP_SHORT_NAME: process.env.TELEGRAM_APP_SHORT_NAME,
+	PHONE_NUMBER: process.env.TELEGRAM_PHONE_NUMBER,
+	PASSWORD: process.env.TELEGRAM_PASSWORD,
+	PHONE_CODE: process.env.TELEGRAM_PHONE_CODE
 };

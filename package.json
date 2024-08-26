@@ -28,6 +28,7 @@
 		"module-alias": "~2.2.3",
 		"moment": "^2.30.1",
 		"node-singleflight": "^0.1.2",
+		"telegram": "^2.24.11",
 		"tslib": "~2.6.2",
 		"valibot": "^0.36.0"
 	},
