@@ -12,7 +12,7 @@ const rl = readline.createInterface({
 });
 
 (async () => {
-	console.log('Loading interactive example...');
+	// console.log('Loading interactive example...');
 	const client = new TelegramClient(stringSession, apiId, apiHash, {
 		connectionRetries: 5
 	});
@@ -28,10 +28,10 @@ const rl = readline.createInterface({
 		phoneCode: async () =>
 			new Promise((resolve) =>
 				rl.question('Please enter the code you received: ', resolve)
-			),
-		onError: (err) => console.log(err)
+			)
+		// onError: (err) => console.log(err)
 	});
-	console.log('You should now be connected.');
-	console.log(client.session.save()); // Save this string to avoid logging in again
+	// console.log('You should now be connected.');
+	// console.log(client.session.save()); // Save this string to avoid logging in again
 	await client.sendMessage('me', { message: 'Hello!' });
 })();
