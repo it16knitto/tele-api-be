@@ -1,9 +1,10 @@
-const { TelegramClient } = require('telegram');
+const { TelegramClient, Api } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const readline = require('readline');
 
-const apiId = 123456;
-const apiHash = '123456abcdfg';
+require('dotenv').config();
+const apiId = process.env.TELEGRAM_API_ID;
+const apiHash = process.env.TELEGRAM_API_HASH;
 const stringSession = new StringSession(''); // fill this later with the value from session.save()
 
 const rl = readline.createInterface({
@@ -33,5 +34,12 @@ const rl = readline.createInterface({
 	});
 	// console.log('You should now be connected.');
 	// console.log(client.session.save()); // Save this string to avoid logging in again
-	await client.sendMessage('me', { message: 'Hello!' });
+
+	const result = await client.invoke(
+		new Api.auth.ExportLoginToken({
+			apiId,
+			apiHash,
+			exceptIds: [BigInt('-4156887774564')]
+		})
+	);
 })();
