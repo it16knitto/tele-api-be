@@ -96,3 +96,61 @@ export const telegramChannelSendMessages: TRequestFunction = async (req) => {
 	await telegramClient.sendMessage(channel, { message });
 	return { result: null, message: 'Message sent' };
 };
+
+export const telegramChannelSendMedia: TRequestFunction = async (req: any) => {
+	const { channel_username } = req.params;
+	const { message } = req.body;
+	const filePath: any = req.file.path;
+
+	const channel = await telegramClient.getEntity(channel_username);
+	await telegramClient.sendFile(channel, {
+		file: filePath,
+		caption: message ?? null
+	});
+};
+
+export const telegramChannelBanUser: TRequestFunction = async (req) => {
+	const { channel_username } = req.params;
+	const { user_username } = req.body;
+
+	const channel = await telegramClient.getEntity(channel_username);
+	const user = await telegramClient.getEntity(user_username);
+
+	await telegramClient.invoke(
+		new Api.channels.EditBanned({
+			channel: channel,
+			participant: user,
+			bannedRights: new Api.ChatBannedRights({
+				untilDate: 0, // 0 means the user is banned forever; you can set a specific timestamp to unban them automatically
+				viewMessages: true
+			})
+		})
+	);
+	return { result: null, message: 'User banned' };
+};
+export const telegramChannelUnbanUser: TRequestFunction = async (req) => {
+	const { channel_username } = req.params;
+	const { user_username } = req.body;
+
+	const channel = await telegramClient.getEntity(channel_username);
+	const user = await telegramClient.getEntity(user_username);
+
+	await telegramClient.invoke(
+		new Api.channels.EditBanned({
+			channel: channel,
+			participant: user,
+			bannedRights: new Api.ChatBannedRights({
+				untilDate: 0, // Set untilDate to 0 to lift the ban
+				viewMessages: false, // Set viewMessages to false to lift the ban
+				sendMessages: false,
+				sendMedia: false,
+				sendStickers: false,
+				sendGifs: false,
+				sendGames: false,
+				sendInline: false,
+				embedLinks: false
+			})
+		})
+	);
+	return { result: null, message: 'User unbanned' };
+};
