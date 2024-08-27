@@ -47,3 +47,19 @@ export const telegramMe: TRequestFunction = async () => {
 	const me = await telegramClient.getMe();
 	return { result: me };
 };
+export const telegramGetEntity: TRequestFunction = async (req) => {
+	const { username } = req.params;
+
+	const entity = await telegramClient.getEntity(username);
+	return { result: entity };
+};
+export const telegramGetUser: TRequestFunction = async (req) => {
+	const { username } = req.params;
+
+	const user = await telegramClient.invoke(
+		new Api.users.GetFullUser({
+			id: username
+		})
+	);
+	return { result: user };
+};

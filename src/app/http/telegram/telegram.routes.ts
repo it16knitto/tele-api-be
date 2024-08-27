@@ -1,5 +1,7 @@
 import { requestHandler, Router } from '@knittotextile/knitto-http';
 import {
+	telegramGetEntity,
+	telegramGetUser,
 	telegramMe,
 	telegramSendCode,
 	telegramVerifyCode
@@ -12,4 +14,12 @@ telegramRouter.post(
 	requestHandler(telegramVerifyCode)
 );
 telegramRouter.get('/telegram/me', requestHandler(telegramMe));
+telegramRouter.get(
+	'/telegram/get-entity/:username',
+	requestHandler(telegramGetEntity)
+);
+telegramRouter.get(
+	'/telegram/get-user/:username',
+	requestHandler(telegramGetUser)
+);
 export default telegramRouter;
