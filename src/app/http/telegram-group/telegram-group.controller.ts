@@ -135,11 +135,23 @@ export const telegramGroupRemoveUser: TRequestFunction = async (req) => {
 	);
 	return { result };
 };
-// export const telegramGroupDelete: TRequestFunction = async (req) => {
-// 	const { group_username } = req.params;
-// 	const group = await telegramClient.getEntity(group_username);
-// 	if (!group) {
-// 		throw new Error('Group not found');
-// 	}
-
-// };
+export const telegramGroupRename: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	const { new_name } = req.body;
+	const result = await telegramClient.invoke(
+		new Api.messages.EditChatTitle({
+			chatId: BigInteger(group_id), // The ID of the group chat to rename
+			title: new_name // The new title for the group
+		})
+	);
+	return { result };
+};
+export const telegramGroupDelete: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	const result = await telegramClient.invoke(
+		new Api.messages.DeleteChat({
+			chatId: BigInteger(group_id)
+		})
+	);
+	return { result };
+};

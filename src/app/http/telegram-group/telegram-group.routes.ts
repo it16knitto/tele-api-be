@@ -2,10 +2,12 @@ import { requestHandler, Router } from '@knittotextile/knitto-http';
 import {
 	telegramGroupAddUser,
 	telegramGroupCreate,
+	telegramGroupDelete,
 	telegramGroupGet,
 	telegramGroupListGroup,
 	telegramGroupListMembers,
-	telegramGroupRemoveUser
+	telegramGroupRemoveUser,
+	telegramGroupRename
 } from './telegram-group.controller';
 
 const telegramGroupRouter = Router();
@@ -29,5 +31,13 @@ telegramGroupRouter.post(
 telegramGroupRouter.post(
 	'/telegram/group/:group_id/remove-user',
 	requestHandler(telegramGroupRemoveUser)
+);
+telegramGroupRouter.post(
+	'/telegram/group/:group_id/rename',
+	requestHandler(telegramGroupRename)
+);
+telegramGroupRouter.delete(
+	'/telegram/group/:group_id/delete',
+	requestHandler(telegramGroupDelete)
 );
 export default telegramGroupRouter;

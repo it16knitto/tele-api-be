@@ -2,6 +2,7 @@ import './libs/helpers/initModuleAlias';
 import { dump } from '@knittotextile/knitto-core-backend';
 import httpServer from '@http/index';
 import telegramClient from './services/telegram.service';
+import { googleDriveCreateCredential } from './services/google.service';
 
 (async () => {
 	try {
@@ -9,6 +10,7 @@ import telegramClient from './services/telegram.service';
 		// await rabbitConnection.init();
 		// console.log(telegramClient.session.save());
 		// start application
+		await googleDriveCreateCredential();
 		if (!telegramClient.connected) {
 			await telegramClient.connect();
 		}
