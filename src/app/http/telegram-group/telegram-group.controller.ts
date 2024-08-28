@@ -1,4 +1,3 @@
-import { NotFoundException } from '@knittotextile/knitto-core-backend/dist/CoreException';
 import { TRequestFunction } from '@knittotextile/knitto-http';
 import telegramClient from '@root/services/telegram.service';
 import { Api } from 'telegram';
@@ -94,7 +93,7 @@ export const telegramGroupAddUser: TRequestFunction = async (req) => {
 	);
 	return { result };
 };
-export const telegramGroupListGroup: TRequestFunction = async (req) => {
+export const telegramGroupListGroup: TRequestFunction = async () => {
 	const dialogs = await telegramClient.getDialogs();
 
 	const arrResult = [];
