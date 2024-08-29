@@ -10,7 +10,9 @@ import {
 	googleDriveReadFile,
 	googleDriveDownloadFile,
 	googleDriveShareFileFolder,
-	googleDriveUnShareFileFolder
+	googleDriveUnShareFileFolder,
+	googleDriveCopyFileFolder,
+	googleDriveMoveFileFolder
 } from './google-drive.controller';
 import { requestHandler, Router } from '@knittotextile/knitto-http';
 const storage = multer.diskStorage({
@@ -64,6 +66,14 @@ googleDriveRouter.post(
 googleDriveRouter.post(
 	'/google-drive/unshare/:file_id',
 	requestHandler(googleDriveUnShareFileFolder)
+);
+googleDriveRouter.post(
+	'/google-drive/copy/:file_id',
+	requestHandler(googleDriveCopyFileFolder)
+);
+googleDriveRouter.post(
+	'/google-drive/move/:file_id',
+	requestHandler(googleDriveMoveFileFolder)
 );
 
 export default googleDriveRouter;

@@ -179,3 +179,47 @@ export const googleDriveUnShareFileFolder: TRequestFunction = async (req) => {
 	});
 	return { result: response };
 };
+
+export const googleDriveCopyFileFolder: TRequestFunction = async (req) => {
+	const { file_id } = req.params;
+	const { folder_id } = req.body;
+	// Get the file details to retrieve the name
+	const fileDetails = await googleDrive.files.get({
+		fileId: file_id,
+		fields: 'name'
+	});
+
+	const fileName = fileDetails.data.name;
+
+	const response = await googleDrive.files.copy({
+		fileId: file_id,
+		requestBody: {
+			name: fileName,
+			parents: [folder_id]
+		}
+	});
+	return { result: response };
+};
+
+export const googleDriveMoveFileFolder: TRequestFunction = async (req) => {
+	const { file_id } = req.params;
+	const { folder_id } = req.body;
+
+	// Get the current parent folders
+	const file = await googleDrive.files.get({
+		fileId: file_id,
+		fields: 'parents'
+	});
+
+	const currentParents = file.data.parents?.join(',') || '';
+
+	// Move the file to the new folder
+	const response = await googleDrive.files.update({
+		fileId: file_id,
+		addParents: folder_id,
+		removeParents: currentParents,
+		fields: 'id, parents'
+	});
+
+	return { result: response };
+};
