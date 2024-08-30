@@ -8,7 +8,6 @@ import { googleDriveCreateCredential } from './services/google.service';
 	try {
 		// await mysqlConnection.init();
 		// await rabbitConnection.init();
-		// console.log(telegramClient.session.save());
 		// start application
 		await googleDriveCreateCredential();
 		if (!telegramClient.connected) {

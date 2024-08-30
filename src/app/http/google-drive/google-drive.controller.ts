@@ -4,16 +4,33 @@ import { googleDrive } from '@root/services/google.service';
 import { drive_v3 } from 'googleapis';
 import fs from 'fs';
 
-export const googleDriveListFiles: TRequestFunction = async (req) => {
-	const { folder_id } = req.query;
-	const folderId = folder_id ? folder_id : 'root';
+export const googleDriveListFilesAndFolders: TRequestFunction = async (req) => {
+	const { folder_id, page_size = '10', page_token } = req.query;
+	const folderId = folder_id ? folder_id : '0AAYg9y915Se9Uk9PVA';
 	const { data } = await googleDrive.files.list({
-		// fields: 'nextPageToken, files(*)'
+		pageSize: parseInt(page_size as string),
+		pageToken: page_token as string | undefined,
 		fields:
-			'nextPageToken, files(id, name, mimeType, parents, size, fileExtension, permissions(id, emailAddress, role))',
+			'nextPageToken, files(id, name, mimeType, parents, size, fileExtension, permissions(id, emailAddress, role), iconLink)',
 		q: `'${folderId}' in parents`
 	});
-	return { result: data };
+
+	// Get total count of files in the folder
+	const totalCountResponse = await googleDrive.files.list({
+		q: `'${folderId}' in parents`,
+		fields: 'files(id)',
+		pageSize: 1000 // Set a large page size to get all files (adjust if needed)
+	});
+
+	const totalCount = totalCountResponse.data.files?.length || 0;
+
+	return {
+		result: {
+			data: data.files,
+			nextPageToken: data.nextPageToken,
+			totalCount
+		}
+	};
 };
 
 export const googleDriveUploadFile: TRequestFunction = async (req) => {
@@ -113,6 +130,9 @@ export const googleDriveDownloadFile = async (
 ) => {
 	try {
 		const { file_id } = req.params;
+		const { data } = await googleDrive.files.get({
+			fileId: file_id
+		});
 
 		const response = await googleDrive.files.get(
 			{
@@ -125,15 +145,11 @@ export const googleDriveDownloadFile = async (
 		);
 
 		// Set headers for file download
-		res.setHeader(
-			'Content-Disposition',
-			`attachment; filename="${
-				response.headers['content-disposition'].split('filename=')[1]
-			}"`
-		);
+
+		res.setHeader('Content-Disposition', `attachment; filename="${data.name}"`);
 		res.setHeader('Content-Type', response.headers['content-type']);
 
-		return res.send(response.data);
+		return response.data.pipe(res);
 	} catch (e) {
 		return res.status(500).send('Error downloading file');
 	}
@@ -222,4 +238,15 @@ export const googleDriveMoveFileFolder: TRequestFunction = async (req) => {
 	});
 
 	return { result: response };
+};
+
+export const googleDriveRetrieveOnlyFile: TRequestFunction = async (req) => {
+	const { folder_id } = req.query;
+	const folderId = folder_id ? folder_id : '0AAYg9y915Se9Uk9PVA';
+	const response = await googleDrive.files.list({
+		fields:
+			'files(id, name, mimeType, parents, size, fileExtension, permissions(id, emailAddress, role), iconLink)',
+		q: `'${folderId}' in parents and mimeType != 'application/vnd.google-apps.folder'`
+	});
+	return { result: response.data.files };
 };

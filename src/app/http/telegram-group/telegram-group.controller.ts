@@ -99,7 +99,7 @@ export const telegramGroupListGroup: TRequestFunction = async () => {
 	const arrResult = [];
 
 	for (const dialog of dialogs) {
-		const { entity } = dialog;
+		const { entity, message, date } = dialog;
 		if (entity.className === 'Channel' && entity.megagroup) {
 			// Check if it's a group (supergroup)
 			arrResult.push({
@@ -107,7 +107,10 @@ export const telegramGroupListGroup: TRequestFunction = async () => {
 				title: entity.title,
 				username: entity.username,
 				membersCount: entity.participantsCount,
-				type: 'supergroup'
+				type: 'supergroup',
+				photo: entity.photo, // Add photo
+				lastMessage: message?.message, // Add last message
+				timestamp: date // Add timestamp
 			});
 		} else if (entity.className === 'Chat') {
 			// Regular group chats
@@ -116,7 +119,10 @@ export const telegramGroupListGroup: TRequestFunction = async () => {
 				title: entity.title,
 				username: null,
 				membersCount: entity.participantsCount,
-				type: 'group'
+				type: 'group',
+				photo: entity.photo, // Add photo
+				lastMessage: message?.message, // Add last message
+				timestamp: date // Add timestamp
 			});
 		}
 	}

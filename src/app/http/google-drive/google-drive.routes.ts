@@ -3,7 +3,6 @@ import path from 'path';
 import crypto from 'crypto';
 import {
 	googleDriveDeleteFile,
-	googleDriveListFiles,
 	googleDriveRenameFile,
 	googleDriveUploadFile,
 	googleDriveGetOneFile,
@@ -12,7 +11,9 @@ import {
 	googleDriveShareFileFolder,
 	googleDriveUnShareFileFolder,
 	googleDriveCopyFileFolder,
-	googleDriveMoveFileFolder
+	googleDriveMoveFileFolder,
+	googleDriveListFilesAndFolders,
+	googleDriveRetrieveOnlyFile
 } from './google-drive.controller';
 import { requestHandler, Router } from '@knittotextile/knitto-http';
 const storage = multer.diskStorage({
@@ -31,8 +32,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 const googleDriveRouter = Router();
 googleDriveRouter.get(
-	'/google-drive/list-files',
-	requestHandler(googleDriveListFiles)
+	'/google-drive/list-files-folders',
+	requestHandler(googleDriveListFilesAndFolders)
 );
 googleDriveRouter.post(
 	'/google-drive/upload-file',
@@ -74,6 +75,10 @@ googleDriveRouter.post(
 googleDriveRouter.post(
 	'/google-drive/move/:file_id',
 	requestHandler(googleDriveMoveFileFolder)
+);
+googleDriveRouter.get(
+	'/google-drive/files-list',
+	requestHandler(googleDriveRetrieveOnlyFile)
 );
 
 export default googleDriveRouter;
