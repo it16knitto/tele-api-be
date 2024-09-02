@@ -103,7 +103,7 @@ export const telegramGroupListGroup: TRequestFunction = async () => {
 		if (entity.className === 'Channel' && entity.megagroup) {
 			// Check if it's a group (supergroup)
 			arrResult.push({
-				id: entity.id,
+				id: dialog.id,
 				title: entity.title,
 				username: entity.username,
 				membersCount: entity.participantsCount,
@@ -115,7 +115,7 @@ export const telegramGroupListGroup: TRequestFunction = async () => {
 		} else if (entity.className === 'Chat') {
 			// Regular group chats
 			arrResult.push({
-				id: entity.id,
+				id: dialog.id,
 				title: entity.title,
 				username: null,
 				membersCount: entity.participantsCount,
@@ -157,6 +157,111 @@ export const telegramGroupDelete: TRequestFunction = async (req) => {
 	const result = await telegramClient.invoke(
 		new Api.messages.DeleteChat({
 			chatId: BigInteger(group_id)
+		})
+	);
+	return { result };
+};
+export const telegramGroupGetMessages: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	const peerID = await telegramClient.getEntity(BigInteger(group_id));
+
+	// const groupEntity = await telegramClient.getEntity(peerID);
+	// console.log(groupEntity);
+
+	// const result: any = await telegramClient.invoke(
+	// 	new Api.messages.GetHistory({
+	// 		peer: group_id, // The ID of the group to fetch messages from
+	// 		limit: 10 // The number of messages to fetch
+	// 	})
+	// );
+	const result = await telegramClient.getMessages(peerID, { limit: 10 });
+
+	const me = await telegramClient.getMe();
+
+	const simplifiedMessages = result.map((msg: any) => ({
+		name: msg.sender.username,
+		message: msg.message,
+		photo: msg.media ? msg.media.photo : null,
+		media: msg.media,
+		date: msg.date,
+		isMeSend: BigInteger(msg.fromId.userId).equals(BigInteger(me.id))
+	}));
+	// Fetch user or chat information
+
+	return { result: simplifiedMessages };
+};
+export const telegramGroupGetChatHistory: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	const groupEntity = await telegramClient.getEntity(BigInteger(group_id));
+
+	// Fetch messages
+	const result: any = await telegramClient.invoke(
+		new Api.messages.GetHistory({
+			peer: groupEntity, // Use the resolved entity
+			limit: 10 // The number of messages to fetch
+		})
+	);
+
+	const messagesWithPhotos = [];
+
+	for (const message of result.messages) {
+		let senderName = 'Unknown';
+		let messageContent = message.message || 'No message content';
+
+		// Get sender details if it's a user
+		if (message.fromId && message.fromId instanceof Api.PeerUser) {
+			const user: any = await telegramClient.invoke(
+				new Api.users.GetFullUser({
+					id: message.fromId.userId
+				})
+			);
+			if (user) {
+				senderName = user.users[0].firstName + ' ' + user.users[0].lastName;
+			}
+		}
+
+		// Handle messages with photos
+		if (message.media && message.media instanceof Api.MessageMediaPhoto) {
+			const photo = message.media.photo;
+
+			// Download photo
+			// const filePath = `./photo_${message.id}.jpg`;
+			// await telegramClient.downloadMedia(photo, { file: filePath });
+			// console.log(`Photo saved to ${filePath}`);
+
+			// Convert photo to Base64
+
+			// Store message info including the photo in Base64 format
+			messagesWithPhotos.push({
+				date: message.date,
+				sender: senderName,
+				content: messageContent,
+				photo: photo
+				// photoBase64: photoBase64 // Add Base64-encoded photo
+			});
+
+			// Optionally, delete the file after converting to Base64
+			// fs.unlinkSync(filePath);
+		} else {
+			messagesWithPhotos.push({
+				date: message.date,
+				sender: senderName,
+				content: messageContent,
+				photo: null
+				// photoBase64: null // No photo attached
+			});
+		}
+	}
+	return { result: messagesWithPhotos };
+};
+export const telegramGroupSendMessage: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	const { message } = req.body;
+	const groupEntity = await telegramClient.getEntity(BigInteger(group_id));
+	const result = await telegramClient.invoke(
+		new Api.messages.SendMessage({
+			peer: groupEntity,
+			message: message
 		})
 	);
 	return { result };

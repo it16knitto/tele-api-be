@@ -4,10 +4,13 @@ import {
 	telegramGroupCreate,
 	telegramGroupDelete,
 	telegramGroupGet,
+	telegramGroupGetChatHistory,
+	telegramGroupGetMessages,
 	telegramGroupListGroup,
 	telegramGroupListMembers,
 	telegramGroupRemoveUser,
-	telegramGroupRename
+	telegramGroupRename,
+	telegramGroupSendMessage
 } from './telegram-group.controller';
 
 const telegramGroupRouter = Router();
@@ -40,4 +43,17 @@ telegramGroupRouter.delete(
 	'/telegram/group/:group_id/delete',
 	requestHandler(telegramGroupDelete)
 );
+telegramGroupRouter.get(
+	'/telegram/group/:group_id/messages',
+	requestHandler(telegramGroupGetMessages)
+);
+telegramGroupRouter.get(
+	'/telegram/group/:group_id/chat-history',
+	requestHandler(telegramGroupGetChatHistory)
+);
+telegramGroupRouter.post(
+	'/telegram/group/:group_id/send-message',
+	requestHandler(telegramGroupSendMessage)
+);
+
 export default telegramGroupRouter;
