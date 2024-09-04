@@ -8,6 +8,7 @@ import {
 	telegramGroupGetMessages,
 	telegramGroupListGroup,
 	telegramGroupListMembers,
+	telegramGroupListUser,
 	telegramGroupRemoveUser,
 	telegramGroupRename,
 	telegramGroupSendMessage
@@ -55,5 +56,8 @@ telegramGroupRouter.post(
 	'/telegram/group/:group_id/send-message',
 	requestHandler(telegramGroupSendMessage)
 );
-
+telegramGroupRouter.get(
+	'/telegram/group/:group_id/member',
+	requestHandler(telegramGroupListUser)
+);
 export default telegramGroupRouter;

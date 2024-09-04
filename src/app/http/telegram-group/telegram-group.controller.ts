@@ -266,3 +266,22 @@ export const telegramGroupSendMessage: TRequestFunction = async (req) => {
 	);
 	return { result };
 };
+export const telegramGroupListUser: TRequestFunction = async (req) => {
+	const { group_id } = req.params;
+	// const result = await telegramClient.invoke(
+	// 	new Api.messages.part({
+	// 		chatId: group_id,
+	// 		filter: new Api.ChannelParticipantsRecent(),
+	// 		offset: 0,
+	// 		limit: 100
+	// 	})
+	// );
+	const groupEntity = await telegramClient.getEntity(BigInteger(group_id));
+	const participants = telegramClient.iterParticipants(groupEntity);
+	const result: any[] = [];
+	for await (const participant of participants) {
+		//console.log("participant is", participant); // this line is very verbose but helpful for debugging
+		result.push({ id: participant.id, username: participant.username });
+	}
+	return { result };
+};
